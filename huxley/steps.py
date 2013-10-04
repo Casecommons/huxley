@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import logging
 
 from huxley.consts import TestRunModes
 from huxley.errors import TestError
@@ -63,6 +64,7 @@ class ScreenshotTestStep(TestStep):
     def __init__(self, offset_time, run, index):
         super(ScreenshotTestStep, self).__init__(offset_time)
         self.index = index
+        self.logger = logger or logging.getLogger(__name__)
 
     def get_path(self, run):
         return os.path.join(run.path, 'screenshot' + str(self.index) + '.png')
@@ -88,6 +90,8 @@ class ScreenshotTestStep(TestStep):
                         )
                     else:
                         raise TestError('Screenshot %s was different.' % self.index)
+            except (ValueError):
+              raise TestError('Screenshot %s was different.')
             finally:
                 if not run.save_diff:
                     os.unlink(new)

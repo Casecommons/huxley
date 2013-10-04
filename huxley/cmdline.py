@@ -22,6 +22,9 @@ import plac
 
 from huxley.main import main as huxleymain
 from huxley.version import __version__
+import pdb
+
+import logging
 
 class ExitCodes(object):
     OK = 0
@@ -76,6 +79,9 @@ def _main(
         print 'Huxley ' + __version__
         return ExitCodes.OK
 
+    logging.config.fileConfig('logging.ini')
+    logger = logging.getLogger(__name__)
+
     testfiles = glob.glob(testfile)
     if len(testfiles) == 0:
         print 'no Huxleyfile found'
@@ -86,8 +92,11 @@ def _main(
     for file in testfiles:
         msg = 'Running Huxley file: ' + file
         print '-' * len(msg)
+        logger.info('-' * len(msg))
         print msg
+        logger.info(msg)
         print '-' * len(msg)
+        logger.info('-' * len(msg))
 
         config = ConfigParser.SafeConfigParser(
             defaults=DEFAULTS,
@@ -98,8 +107,10 @@ def _main(
             if names and (testname not in names):
                 continue
             print 'Running test:', testname
+            logger.info('Running test:', testname)
             test_config = dict(config.items(testname))
             url = config.get(testname, 'url')
+            browser = config.get(testname, 'browser')
             default_filename = os.path.join(
                 os.path.dirname(file),
                 testname + '.huxley'
@@ -127,7 +138,8 @@ def _main(
                     local=LOCAL_WEBDRIVER_URL,
                     remote=REMOTE_WEBDRIVER_URL,
                     record=True,
-                    screensize=screensize
+                    screensize=screensize,
+                    browser=browser
                 )
             else:
                 r = huxleymain(
@@ -138,16 +150,21 @@ def _main(
                     sleepfactor=sleepfactor,
                     autorerecord=not playback_only,
                     save_diff=save_diff,
-                    screensize=screensize
+                    screensize=screensize,
+                    browser=browser
                 )
             new_screenshots = new_screenshots or (r != 0)
             print
 
     if new_screenshots:
         print '** New screenshots were written; please verify that they are correct. **'
+        logger.info('** New screenshots were written; please verify that they are correct. **')
         return ExitCodes.NEW_SCREENSHOTS
     else:
         return ExitCodes.OK
 
 def main():
     sys.exit(plac.call(_main))
+
+if __name__ == '__main__':
+  sys.exit(plac.call(_main))

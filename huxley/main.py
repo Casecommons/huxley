@@ -24,6 +24,8 @@ from selenium import webdriver
 from huxley.run import TestRun
 from huxley.errors import TestError
 
+import logging
+
 DRIVERS = {
     'firefox': webdriver.Firefox,
     'chrome': webdriver.Chrome,
@@ -93,6 +95,7 @@ def main(
     except:
         pass
 
+    logger = logging.getLogger(__name__)
     diffcolor = tuple(int(x) for x in diffcolor.split(','))
     jsonfile = os.path.join(filename, 'record.json')
 
@@ -110,30 +113,44 @@ def main(
                         )
                     )
             print 'Test recorded successfully'
+            logger.info('Test recorded successfully')
             return 0
         elif rerecord:
             with open(jsonfile, 'r') as f:
                 TestRun.rerecord(jsonpickle.decode(f.read()), filename, (url, postdata), d, sleepfactor, diffcolor, save_diff)
                 print 'Test rerecorded successfully'
+                logger.info('Test recorded successfully')
                 return 0
         elif autorerecord:
             with open(jsonfile, 'r') as f:
                 test = jsonpickle.decode(f.read())
             try:
                 print 'Running test to determine if we need to rerecord'
+                logger.info('Running test to determine if we need to rerecord')
                 TestRun.playback(test, filename, (url, postdata), d, sleepfactor, diffcolor, save_diff)
                 print 'Test played back successfully'
+                logger.info('Test played back successfully')
                 return 0
             except TestError:
                 print 'Test failed, rerecording...'
+                logger.error('Test failed, rerecording...')
                 TestRun.rerecord(test, filename, (url, postdata), d, sleepfactor, diffcolor, save_diff)
                 print 'Test rerecorded successfully'
+                logger.error('Test rerecorded successfully')
                 return 2
         else:
             with open(jsonfile, 'r') as f:
-                TestRun.playback(jsonpickle.decode(f.read()), filename, (url, postdata), d, sleepfactor, diffcolor, save_diff)
+                test = jsonpickle.decode(f.read())
+            try:
+                TestRun.playback(test, filename, (url, postdata), d, sleepfactor, diffcolor, save_diff)
                 print 'Test played back successfully'
+                logger.info('Test played back successfully')
                 return 0
+            except TestError:
+                print 'Image is different continuing playback'
+                logger.error('Image is different continuing playback')
+                return 2
+
 
 if __name__ == '__main__':
     sys.exit(plac.call(main))

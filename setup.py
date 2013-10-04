@@ -13,7 +13,7 @@ setup(
         'selenium==2.32.0',
         'plac==0.9.1',
         'PIL==1.1.7',
-        'jsonpickle==0.4.0'
+        'jsonpickle==0.6.1'
     ],
     package_data={'': ['requirements.txt']},
     entry_points = {
