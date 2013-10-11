@@ -100,6 +100,7 @@ def _main(
             print 'Running test:', testname
             test_config = dict(config.items(testname))
             url = config.get(testname, 'url')
+            browser = config.get(testname, 'browser')
             default_filename = os.path.join(
                 os.path.dirname(file),
                 testname + '.huxley'
@@ -127,7 +128,8 @@ def _main(
                     local=LOCAL_WEBDRIVER_URL,
                     remote=REMOTE_WEBDRIVER_URL,
                     record=True,
-                    screensize=screensize
+                    screensize=screensize,
+                    browser=browser
                 )
             else:
                 r = huxleymain(
@@ -138,7 +140,8 @@ def _main(
                     sleepfactor=sleepfactor,
                     autorerecord=not playback_only,
                     save_diff=save_diff,
-                    screensize=screensize
+                    screensize=screensize,
+                    browser=browser
                 )
             new_screenshots = new_screenshots or (r != 0)
             print
