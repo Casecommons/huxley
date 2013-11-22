@@ -4,3 +4,4 @@ Huxley.egg-info
 build/
 dist/
 .DS_Store
+.vimlog
